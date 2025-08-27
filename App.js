@@ -1,14 +1,35 @@
 import { StatusBar } from "expo-status-bar";
 import {
+  Alert,
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
 
 export default function App() {
+  const [tasks,setTasks] = useState([]);// Estado para armazenar a lista de tarefas
+  const [newTask,setNewTask] = useState(""); //Estado para texto da nova tarefa
+
+  const addTask = () => {
+    if(newTask.trim().length > 0){ //Garante que a tarefa não sejá vazia
+      setTasks((prevTasks)=>[
+        ...prevTasks, // lista tudo o que o usurio escreve 
+        {id: Date.now().toString(), text: newTask.trim(), completed:false }, 
+      ]);// cada coisa que ele digitar iá ser um iD unico, para poder ser captado
+      setNewTask("")//Limpar o campo de input
+      Keyboard.dismiss(); //Fecha o teclado do usúario
+    } else { // se não
+      Alert.alert("Atenção", "Digite ou informe uma tarefa!"); // Dá um alertade usurio
+    }
+  }
+
+
   return (
     // Cabeçalho
     <View style={styles.container}>
@@ -24,8 +45,11 @@ export default function App() {
         <TextInput
           style={styles.input}
           placeholder="Adicionar nova tarefa..."
+          value={newTask} // será uma nova tarefa ou irá fazer referencia de uma nova tarefa
+          onChangeText={setNewTask} //Quando você escreve ele mostra no input e quando clica para enviar ele addTask
+          onSubmitEditing={addTask} // Adiciona a tarefa ao pressionar Enter no teclado
         />
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={addTask}>
           <Text style={styles.buttonText}>Adicionar</Text>
         </TouchableOpacity>
       </View>
@@ -34,15 +58,28 @@ export default function App() {
       {/* Manda em formato de listagem em sequencia */}
       <FlatList
         style={styles.flatList}
-        // Quando a listagem for vazio faz algo
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyListText}>
+        data={tasks} // dou um dado para ele
+        keyExtractor={(item) => item.id} //seleciono um item, tudo que estiver la dentro ele traz
+        renderItem={({item})=>(
+           //Preciso colocar o id do item se não ele não acha
+          <View key={item.id} style={styles.taskItem}>
+            <Text>{item.text}</Text>
+            <TouchableOpacity>
+              <Text>🗑️</Text>
+            </TouchableOpacity>
+          </View>
+        )} // preciso importar o item extrator (eles trabalham juntos)
+        ListEmptyComponent={() => (// Quando a listagem for vazio faz algo
+          <Text 
+          style={styles.emptyListText}
+          >
             Nenhum tarefa adicionada ainda.
           </Text>
         )}
         // caixa de estilo da lista
         contentContainerStyle={styles.flatListContent}
       />
+      
 
       <StatusBar style="auto" />
     </View>
@@ -52,7 +89,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(153, 89, 238, 0.17)",
+    backgroundColor: "rgba(184, 141, 240, 0.17)",
   },
   topBar: {
     backgroundColor:"#fff",
