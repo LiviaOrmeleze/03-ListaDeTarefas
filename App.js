@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 export default function App() {
   const [tasks, setTasks] = useState([]); // Estado para armazenar a lista de tarefas
   const [newTask, setNewTask] = useState(""); //Estado para texto da nova tarefa
+  const [isDarkMode, setIsDarkMode] = useState(false); // Estado para alternar o tema
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -82,50 +83,66 @@ export default function App() {
     );
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode); // Alterna entre claro e escuro
+  };
+
   const renderList = (
     { item } // isso não é um codigo de javaScript, é só codigos para visualização
   ) => (
     //Preciso colocar o id do item se não ele não acha
-    <View style={styles.taskItem} key={item.id}>
+    <View style={[styles.taskItem, isDarkMode && darkStyles.taskItem]} key={item.id}>
       <TouchableOpacity
         style={styles.taskTextContainer}
         onPress={() => toggleTaskCompleted(item.id)}
       >
         {/* Se  */}
         <Text
-          style={[styles.taskIext, item.completed && styles.completedTaskItem]}
+          style={[
+            styles.taskText,
+            isDarkMode && darkStyles.taskText,
+            item.completed && styles.completedTaskItem,
+          ]}
         >
           {item.text}
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => deleteTask(item.id)}>
-        <Text style={styles.taskText}>🗑️</Text>
+        <Text style={[styles.taskText, isDarkMode && darkStyles.taskText]}>🗑️</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
     // Cabeçalho
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Minhas tarefas</Text>
-        <TouchableOpacity>
-          <Text>🌛</Text>
+    <View style={[styles.container, isDarkMode && darkStyles.container]}>
+      <View style={[styles.topBar, isDarkMode && darkStyles.topBar]}>
+        <Text style={[styles.topBarTitle, isDarkMode && darkStyles.topBarTitle]}>
+          Minhas tarefas
+        </Text>
+        <TouchableOpacity onPress={toggleTheme}>
+          <Text>{isDarkMode ? "☀️" : "🌛"}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Local onde o usuario inseri a tarefa */}
-      <View style={styles.card}>
+      <View style={[styles.card, isDarkMode && darkStyles.card]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode && darkStyles.input]}
           placeholder="Adicionar nova tarefa..."
+          placeholderTextColor={isDarkMode ? "#aaa" : "#666"}
           value={newTask} // será uma nova tarefa ou irá fazer referencia de uma nova tarefa
           onChangeText={setNewTask} //Quando você escreve ele mostra no input e quando clica para enviar ele addTask
           onSubmitEditing={addTask} // Adiciona a tarefa ao pressionar Enter no teclado
         />
-        <TouchableOpacity style={styles.addButton} onPress={addTask}>
-          <Text style={styles.buttonText}>Adicionar</Text>
+        <TouchableOpacity
+          style={[styles.addButton, isDarkMode && darkStyles.addButton]}
+          onPress={addTask}
+        >
+          <Text style={[styles.buttonText, isDarkMode && darkStyles.buttonText]}>
+            Adicionar
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -261,5 +278,36 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 50,
     fontSize: 16,
+  },
+});
+
+const darkStyles = StyleSheet.create({
+  container: {
+    backgroundColor: "#121212",
+  },
+  topBar: {
+    backgroundColor: "rgba(68, 8, 146, 0.81)",
+  },
+  topBarTitle: {
+    color: "#fff",
+  },
+  card: {
+    backgroundColor: "rgba(68, 8, 146, 0.81)",
+  },
+  input: {
+    borderBottomColor: "#555",
+    color: "#000",
+  },
+  addButton: {
+    backgroundColor: "rgba(173, 138, 219, 0.81)",
+  },
+  buttonText: {
+    color: "#000",
+  },
+  taskItem: {
+    backgroundColor: "#1f1f1f",
+  },
+  taskText: {
+    color: "#fff",
   },
 });
